@@ -97,6 +97,8 @@ roi_img = img.copy()
  
 f = open('./res.txt', 'w')
 
+content = ''
+
 for field in result['images'][0]['fields']:
     text = field['inferText']
     vertices_list = field['boundingPoly']['vertices']
@@ -113,7 +115,10 @@ for field in result['images'][0]['fields']:
     roi_img = put_text(roi_img, text, topLeft[0], topLeft[1] - 20, font_size=30)
     
     f.write(text+' ')
+    content += f'{text} '
 
 f.close()
- 
+
+print(content)
+
 plt_imshow(["Original", "ROI"], [img, roi_img], figsize=(16, 10))

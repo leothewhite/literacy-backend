@@ -10,6 +10,7 @@ import cv2
 import requests
 
 
+# 이미지를 창에 띄워줌 (시제품에는 사용되지 않음)
 def plt_imshow(title='image', img=None, figsize=(8 ,5)):
     plt.figure(figsize=figsize)
  
@@ -45,6 +46,7 @@ def plt_imshow(title='image', img=None, figsize=(8 ,5)):
         plt.show()
 
 
+# 이미지에 텍스트를 넣음 (시제품에 사용되지 않음)
 def put_text(image, text, x, y, color=(0, 255, 0), font_size=22):
     if type(image) == np.ndarray:
         color_coverted = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -67,14 +69,18 @@ def put_text(image, text, x, y, color=(0, 255, 0), font_size=22):
     return opencv_image
 
 
+# api key를 외부 파일에서 읽어옴(보안상의 이유로 분리)
 key_file = open('./keys/ocr_api_key.txt', 'r')
-api_url = 'https://8hiktk5tv5.apigw.ntruss.com/custom/v1/33325/5c41bfa54bca338e50b0223ee042f32d6f43570af778c53d13991477b0784015/general'
 secret_key = key_file.read()
 
+# request를 보낼 ocr api url
+api_url = 'https://8hiktk5tv5.apigw.ntruss.com/custom/v1/33325/5c41bfa54bca338e50b0223ee042f32d6f43570af778c53d13991477b0784015/general'
 
+# 원본 파일(테스트 위해 Untitled.jpg 사용)
 path = './Untitled.jpg'
 files = [('file', open(path,'rb'))]
 
+# ocr api에 보낼 request 설정
 request_json = {'images': [{'format': 'jpg',
                                 'name': 'demo'
                                }],
@@ -82,16 +88,19 @@ request_json = {'images': [{'format': 'jpg',
                     'version': 'V2',
                     'timestamp': int(round(time.time() * 1000))
                    }
- 
+
+
 payload = {'message': json.dumps(request_json).encode('UTF-8')}
  
 headers = {
   'X-OCR-SECRET': secret_key,
 }
- 
+
+# ocr api에 request 보냄
 response = requests.request("POST", api_url, headers=headers, data=payload, files=files)
 result = response.json()
 
+# 텍스트 추출 결과를 표시할 사본 복사
 img = cv2.imread(path)
 roi_img = img.copy()
  
@@ -100,6 +109,7 @@ f = open('./res.txt', 'w')
 content = ''
 
 for field in result['images'][0]['fields']:
+    # 사진에 네모 박스 치기
     text = field['inferText']
     vertices_list = field['boundingPoly']['vertices']
     pts = [tuple(vertice.values()) for vertice in vertices_list]
@@ -121,4 +131,5 @@ f.close()
 
 print(content)
 
+# 창을 띄워 원본 이미지와 네모박스+추출결과 넣은 이미지 표시
 plt_imshow(["Original", "ROI"], [img, roi_img], figsize=(16, 10))

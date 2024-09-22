@@ -58,7 +58,7 @@ def text_extraction():
         cv2.line(roi_img, bottomLeft, topLeft, (0,255,0), 2)
         
         im = Image.fromarray(roi_img)
-        im.save("./uploads/converted.jpg")
+        im.save("converted.jpg")
 
         f.write(text+' ')
         content += f'{text} '

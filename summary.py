@@ -1,8 +1,6 @@
-from PIL import Image
 import uuid
 import json
 import time
-import cv2
 import requests
 import openai
 
@@ -11,9 +9,9 @@ key_file = open('./keys.txt')
 keys = key_file.readlines()
 
 def text_extraction():
+    # 셋업 및 페이로드 설정
     api_url = 'https://8hiktk5tv5.apigw.ntruss.com/custom/v1/33325/5c41bfa54bca338e50b0223ee042f32d6f43570af778c53d13991477b0784015/general'
     secret_key = keys[0][:-1]
-
 
     path = "./uploads/response.jpg"
     files = [('file', open(path,'rb'))]
@@ -34,36 +32,12 @@ def text_extraction():
     
     response = requests.request("POST", api_url, headers=headers, data=payload, files=files)
     result = response.json()
-
-    img = cv2.imread(path)
-    roi_img = img.copy()
     
-    f = open('./res.txt', 'w')
-
     content = ''
 
     for field in result['images'][0]['fields']:
         text = field['inferText']
-        vertices_list = field['boundingPoly']['vertices']
-        pts = [tuple(vertice.values()) for vertice in vertices_list]
-        topLeft = [int(_) for _ in pts[0]]
-        topRight = [int(_) for _ in pts[1]]
-        bottomRight = [int(_) for _ in pts[2]]
-        bottomLeft = [int(_) for _ in pts[3]]
-    
-
-        cv2.line(roi_img, topLeft, topRight, (0,255,0), 2)
-        cv2.line(roi_img, topRight, bottomRight, (0,255,0), 2)
-        cv2.line(roi_img, bottomRight, bottomLeft, (0,255,0), 2)
-        cv2.line(roi_img, bottomLeft, topLeft, (0,255,0), 2)
-        
-        im = Image.fromarray(roi_img)
-        im.save("converted.jpg")
-
-        f.write(text+' ')
         content += f'{text} '
-
-    f.close()
 
     print(content)
 
@@ -71,9 +45,9 @@ def text_extraction():
 
 openai.api_key = keys[1]
 
-
 def summary(result):
-    def chat_with_gpt(prompt):
+    # 페이로드 설정
+    def use_gpt(prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
@@ -83,12 +57,12 @@ def summary(result):
         )
         return response.choices[0].message['content']
 
-    gpt_response = chat_with_gpt(result)
+    gpt_response = use_gpt(result)
 
     return gpt_response
 
 def oneLine(text):
-    def chat_with_gpt(prompt):
+    def use_gpt(prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
@@ -98,13 +72,13 @@ def oneLine(text):
         )
         return response.choices[0].message['content']
     
-    gpt_response = chat_with_gpt(text)
+    gpt_response = use_gpt(text)
 
     return gpt_response
 
 
 def meaning(text):
-    def chat_with_gpt(prompt):
+    def use_gpt(prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
@@ -114,6 +88,6 @@ def meaning(text):
         )
         return response.choices[0].message['content']
         
-    gpt_response = chat_with_gpt(text)
+    gpt_response = use_gpt(text)
 
     return gpt_response

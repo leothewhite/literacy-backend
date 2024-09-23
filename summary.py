@@ -13,7 +13,7 @@ def text_extraction():
     api_url = 'https://8hiktk5tv5.apigw.ntruss.com/custom/v1/33325/5c41bfa54bca338e50b0223ee042f32d6f43570af778c53d13991477b0784015/general'
     secret_key = keys[0][:-1]
 
-    path = "./uploads/response.jpg"
+    path = "./uploads/request.jpg"
     files = [('file', open(path,'rb'))]
 
     request_json = {'images': [{'format': 'jpg',

@@ -16,13 +16,13 @@ def summary_image():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
     
-    # 클라이언트에서 이미지 파일을 받아온 후 ./uploads/response.jpg 에 저장
+    # 클라이언트에서 이미지 파일을 받아온 후 ./uploads/request.jpg 에 저장
     file = request.files['file']
     
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
     
-    filename = "response.jpg"
+    filename = "request.jpg"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
     file.save(filepath)

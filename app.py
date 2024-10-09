@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from summary import summary, text_extraction, oneLine, meaning
 from tts import tts
 import os
@@ -36,18 +36,30 @@ def summary_image():
     oneline = oneLine(summed)
     mean = meaning(text)
 
+    return jsonify({
+        "summary": summed,
+        "original": text,
+        "oneline": oneline,
+        "meaning": mean
+    }), 200
 
-    return jsonify({"summary": summed, "original": text, "oneline": oneline, "meaning": mean}), 200
-
+# 텍스트로부터 tts 생성
 @app.route('/api/literacy-tts', methods=['POST'])
 def get_tts():
     data = request.get_json()
+
+    # tts 오디오 파일을 받아온 후 클라이언트 측으로 전송하기 위해 base64로 인코딩 후 utf8로 디코드
     summary_tts = base64.b64encode(tts(data.get('summary'))).decode('utf8')
     original_tts = base64.b64encode(tts(data.get('original'))).decode('utf8')
     oneline_tts = base64.b64encode(tts(data.get('oneline'))).decode('utf8')
     meaning_tts = base64.b64encode(tts(data.get('meaning'))).decode('utf8')
 
-    return jsonify({"summary": summary_tts, "original": original_tts, "oneline": oneline_tts, "meaning": meaning_tts}), 200
+    return jsonify({
+        "summary": summary_tts,
+        "original": original_tts,
+        "oneline": oneline_tts,
+        "meaning": meaning_tts
+    }), 200
 
 
 if __name__ == "__main__":

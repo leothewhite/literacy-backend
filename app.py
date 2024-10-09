@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, send_file
 from summary import summary, text_extraction, oneLine, meaning
+from tts import tts
 import os
+import base64
 
 app = Flask(__name__)
 
@@ -34,7 +36,19 @@ def summary_image():
     oneline = oneLine(summed)
     mean = meaning(text)
 
+
     return jsonify({"summary": summed, "original": text, "oneline": oneline, "meaning": mean}), 200
+
+@app.route('/api/literacy-tts', methods=['POST'])
+def get_tts():
+    data = request.get_json()
+    summary_tts = base64.b64encode(tts(data.get('summary'))).decode('utf8')
+    original_tts = base64.b64encode(tts(data.get('original'))).decode('utf8')
+    oneline_tts = base64.b64encode(tts(data.get('oneline'))).decode('utf8')
+    meaning_tts = base64.b64encode(tts(data.get('meaning'))).decode('utf8')
+
+    return jsonify({"summary": summary_tts, "original": original_tts, "oneline": oneline_tts, "meaning": meaning_tts}), 200
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8765, debug=True)

@@ -39,6 +39,7 @@ def text_extraction():
         text = field['inferText']
         content += f'{text} '
 
+    print(result)
     print(content)
 
     return content

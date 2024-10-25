@@ -50,8 +50,8 @@ openai.api_key = keys[1]
 def structure(result, level):
     # 페이로드 설정
     def use_gpt(prompt):
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = openai.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -63,8 +63,24 @@ def structure(result, level):
                 }
             ]
         )
-        return response.choices[0].message['content']
+        return response.choices[0].message.content
 
     gpt_response = use_gpt(result)
+
+    return gpt_response
+
+
+def find_word(text):
+    def use_gpt(prompt):
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": f"여기서 어려운 단어를 찾아서 의미를 플어줘. ㅁㅁ: ---- 식으로, 부가적인 설명 없이."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content
+
+    gpt_response = use_gpt(text)
 
     return gpt_response

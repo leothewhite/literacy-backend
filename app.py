@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from summary import text_extraction, structure
+from summary import text_extraction, structure, find_word
 from tts import tts
 import os
 import base64
@@ -42,9 +42,11 @@ def structure_text():
 
 
     structured = structure(data.get('text'), data.get('level'))
+    word = find_word(data.get('text'))
 
     return jsonify({
-        'structure': structured
+        'structure': structured,
+        'word': word
     }), 200
 
 # 텍스트로부터 tts 생성
@@ -54,9 +56,12 @@ def get_tts():
 
     # tts 오디오 파일을 받아온 후 클라이언트 측으로 전송하기 위해 base64로 인코딩 후 utf8로 디코드
     structure_tts = base64.b64encode(tts(data.get('structure'))).decode('utf8')
+    word_tts = base64.b64encode(tts(data.get('word'))).decode('utf8')
+
 
     return jsonify({
-        "structure": structure_tts
+        "structure": structure_tts,
+        'word': word_tts
     }), 200
 
 

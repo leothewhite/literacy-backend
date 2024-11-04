@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from summary import text_extraction, structure
+from summary import text_extraction, structure, find_word, explain
 from tts import tts
 import os
 import base64
@@ -12,13 +12,12 @@ app.config['UPLOAD_FOLDER'] = upload_folder
 if not os.path.exists(upload_folder):
     os.makedirs(upload_folder)
 
-# 이미지를 받아오고 요약 등의 기능을 수행하는 함수
+# 텍스트 추출
 @app.route('/api/literacy-extract', methods=['POST'])
 def extract_text():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
     
-    # 클라이언트에서 이미지 파일을 받아온 후 ./uploads/request.jpg 에 저장
     file = request.files['file']
     
     if file.filename == '':
@@ -29,34 +28,46 @@ def extract_text():
 
     file.save(filepath)
     
-    # 텍스트 추출, 요약, 단어 풀이 등의 기능 수행 후 json 형식으로 반환
-    text = text_extraction()
+    text = text_extraction() # 추출하는 함수 (summary.py)
     
     return jsonify({
         "text": text
     }), 200
 
+# 핵심기능 수행
 @app.route('/api/literacy-main', methods=['POST'])
 def structure_text():
     data = request.get_json()
 
+    mode = data.get('mode')
 
-    structured = structure(data.get('text'), data.get('level'))
+    if mode == 'structure':
+        structured = structure(data.get('text'), data.get('level')) # 원문과 요약의 정도를 불러와서 구조화(요약)을 수행하는 함수
+        return jsonify({
+            'structure': structured
+        }), 200
 
-    return jsonify({
-        'structure': structured
-    }), 200
+    if mode == 'word':
+        word = find_word(data.get('text'))
+        return jsonify({
+            'word': word
+        }), 200
 
-# 텍스트로부터 tts 생성
+    if mode == 'explain':
+        exp = explain(data.get('text'))
+        return jsonify({
+            'explain': exp
+        }), 200
+
+# tts
 @app.route('/api/literacy-tts', methods=['POST'])
 def get_tts():
     data = request.get_json()
 
-    # tts 오디오 파일을 받아온 후 클라이언트 측으로 전송하기 위해 base64로 인코딩 후 utf8로 디코드
-    structure_tts = base64.b64encode(tts(data.get('structure'))).decode('utf8')
+    ttss = base64.b64encode(tts(data.get('text'))).decode('utf8')
 
     return jsonify({
-        "structure": structure_tts
+        'tts': ttss
     }), 200
 
 

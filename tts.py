@@ -1,7 +1,6 @@
 from google.cloud import texttospeech
 import os
 
-# Google의 Cloud Text-to-Speech API 사용 설정
 credential_path = "./blissful-link-416007-68047a1d5003.json"
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
@@ -10,7 +9,6 @@ def tts(text):
 
     max_length = 400    
 
-    # 문장 단위로 나누기
     words = text.split('. ')
     sentences = []
     current_sentence = ''
@@ -26,7 +24,6 @@ def tts(text):
     
     audio_data = []
 
-    # 각각의 문장에 대해 payload 설정 후 전송
     for sentence in sentences:
         input_text = texttospeech.SynthesisInput(text=sentence)
 
@@ -50,3 +47,4 @@ def tts(text):
     
     print("tts ready")
     return audio_data
+
